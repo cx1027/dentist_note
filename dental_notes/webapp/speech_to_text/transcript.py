@@ -8,6 +8,10 @@ import json
 import ollama
 import os
 from groq import Groq
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 client = Groq(api_key = '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')
 # print("client", client)
@@ -40,13 +44,13 @@ openai_api: OpenAIAPI = None
 ollama_api: OllamaAPI = None
 
 # RunPod API configuration
-RUNPOD_API_URL = "https://ipm1wipet51hbz-8008.proxy.runpod.net/"  # Replace with your actual RunPod endpoint
-RUNPOD_API_KEY = "RUNPOD token"  # Replace with your actual API key
+RUNPOD_API_URL = "https://ipm1wipet51hbz-8008.proxy.runpod.net/"
+RUNPOD_API_KEY = os.getenv("RUNPOD_API_KEY")
 
 # from openai import OpenAI
 # client = OpenAI(
 #     base_url="https://ipm1wipet51hbz-8008.proxy.runpod.net/v1",
-#     api_key="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",
+#     api_key=os.getenv("HUGGINGFACE_TOKEN"),
 # )
 
 @eel.expose

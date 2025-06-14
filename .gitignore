@@ -13,3 +13,6 @@ media/
 # Large binary files
 *.dylib
 *.so
+
+HUGGINGFACE_TOKEN=your_token_here
+RUNPOD_API_KEY=your_runpod_key_here

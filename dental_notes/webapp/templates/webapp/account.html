@@ -1,0 +1,80 @@
+{% extends 'webapp/base.html' %}
+{% load static %}
+
+{% block title %}Account Settings - Dental Notes{% endblock %}
+
+{% block extra_css %}
+<style>
+    .account-container {
+        max-width: 600px;
+        margin: 40px auto;
+        padding: 20px;
+    }
+    
+    .profile-section {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding: 20px;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .alert {
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="account-container">
+    <div class="profile-section">
+        <h2 class="mb-4">Account Settings</h2>
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        <form method="POST" action="{% url 'account_update' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" class="form-control" id="username" name="username" 
+                       value="{{ user.username }}" readonly>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" class="form-control" id="email" name="email" 
+                       value="{{ user.email }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="current_password">Current Password</label>
+                <input type="password" class="form-control" id="current_password" 
+                       name="current_password">
+            </div>
+            
+            <div class="form-group">
+                <label for="new_password">New Password (optional)</label>
+                <input type="password" class="form-control" id="new_password" 
+                       name="new_password">
+            </div>
+            
+            <div class="form-group">
+                <label for="confirm_password">Confirm New Password</label>
+                <input type="password" class="form-control" id="confirm_password" 
+                       name="confirm_password">
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+        </form>
+    </div>
+</div>
+{% endblock %} 

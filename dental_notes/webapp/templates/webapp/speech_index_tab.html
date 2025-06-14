@@ -1,0 +1,820 @@
+{% extends 'webapp/base.html' %}
+{% load static %}
+
+{% block title %}Create Recording - Dental Notes{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" type="text/css" href="{% static 'styles.css' %}">
+<style>
+    #summary-output {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        max-width: 800px;
+        margin: 0 auto;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    .summary-content {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .section {
+        margin-bottom: 20px;
+    }
+
+    .title {
+        color: #2c3e50;
+        font-size: 1.1em;
+        margin-bottom: 10px;
+    }
+
+    .point {
+        margin: 8px 0;
+        padding-left: 20px;
+        line-height: 1.5;
+    }
+
+    .point strong {
+        color: #2c3e50;
+        font-weight: 600;
+    }
+
+    /* Add these styles for the new control panel */
+    .control-panel {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .form-floating > .form-control,
+    .form-floating > .form-select {
+        height: calc(3.5rem + 2px);
+        line-height: 1.25;
+    }
+
+    #recording-timer {
+        font-family: monospace;
+        font-size: 1.2rem;
+        text-align: center;
+        background-color: #e9ecef;
+    }
+
+    #save-note {
+        height: calc(3.5rem + 2px);
+    }
+
+    /* 添加新的按钮样式 */
+    #start-button {
+        height: calc(3.5rem + 2px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    #start-button.recording {
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+
+    #start-button.recording:hover {
+        background-color: #bb2d3b;
+        border-color: #b02a37;
+    }
+
+    #start-button.resume {
+        background-color: #198754;
+        border-color: #198754;
+    }
+
+    #start-button.resume:hover {
+        background-color: #157347;
+        border-color: #146c43;
+    }
+
+    /* 确保所有控制面板按钮样式一致 */
+    .control-panel .btn {
+        height: calc(3.5rem + 2px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .audio-player-section {
+        transition: all 0.3s ease;
+    }
+
+    .audio-player-section .card {
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .audio-player-section audio {
+        width: 100%;
+    }
+
+    .audio-player-section .card-title {
+        color: #2c3e50;
+        margin-bottom: 1rem;
+    }
+
+    .audio-player-section .card-title i {
+        margin-right: 0.5rem;
+    }
+
+    .content-area {
+        min-height: 300px;
+        max-height: 500px;
+        overflow-y: auto;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 4px;
+        font-family: monospace;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        outline: none;
+        border: 1px solid #dee2e6;
+    }
+
+    .content-area:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+
+    .console-area {
+        background-color: #212529;
+        color: #fff;
+    }
+
+    .nav-tabs .nav-link {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .card {
+        border: none;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .card-header {
+        background-color: #fff;
+        border-bottom: 1px solid rgba(0,0,0,0.125);
+    }
+
+    .btn-group .btn {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+
+    /* 添加编辑提示样式 */
+    .edit-indicator {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-top: 5px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="loading-screen">
+  <div class="spinner"></div>
+</div>
+
+<!-- Add new control panel -->
+<div class="control-panel mb-4">
+  <div class="row g-3 align-items-center">
+    <!-- Title Input -->
+    <div class="col-md-3">
+      <div class="form-floating">
+        <input type="text" class="form-control" id="note-title" placeholder="Enter title">
+        <label for="note-title">Note Title</label>
+      </div>
+    </div>
+
+    <!-- Language Selection -->
+    <div class="col-md-2">
+      <div class="form-floating">
+        <select class="form-select" id="language-select">
+          <option value="en">English</option>
+          <option value="es">Spanish</option>
+          <option value="fr">French</option>
+          <option value="de">German</option>
+          <option value="zh">Chinese</option>
+        </select>
+        <label for="language-select">Language</label>
+      </div>
+    </div>
+
+    <!-- Recording Timer -->
+    <div class="col-md-2">
+      <div class="form-floating">
+        <input type="text" class="form-control" id="recording-timer" value="00:00:00" readonly>
+        <label for="recording-timer">Recording Time</label>
+      </div>
+    </div>
+
+    <!-- Start/Stop Button -->
+    <div class="col-md-3">
+      <button id="start-button" class="btn btn-primary w-100 h-100">
+        <i class="bi bi-mic-fill"></i> Start Transcription
+      </button>
+    </div>
+
+    <!-- Save Note Button -->
+    <div class="col-md-2">
+      <button id="save-note" class="btn btn-primary w-100 h-100" onclick="saveNote()" disabled>
+        <i class="bi bi-save"></i> Save Note
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="audio-player-section mb-4" style="display: none;">
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">
+        <i class="bi bi-file-earmark-music"></i> Recording Audio
+      </h5>
+      <audio id="recording-audio" controls class="w-100">
+        <source id="recording-source" type="audio/wav">
+        Your browser does not support the audio element.
+      </audio>
+    </div>
+  </div>
+</div>
+
+{% comment %} <div class="menus">
+  <div class="menu" id="app-settings">App Settings</div>
+  <div class="menu" id="model-settings">Model Settings</div>
+  <div class="menu" id="transcribe-settings">Save Note</div>
+  <div class="menu" id="vad-settings">Delete Note</div>
+</div> {% endcomment %}
+<div class="content" id="main-content">
+    <ul class="nav nav-tabs mb-3" id="contentTabs" role="tablist">
+        <!-- Transcription Tab -->
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="transcription-tab" data-bs-toggle="tab"
+                    data-bs-target="#transcription-pane" type="button" role="tab">
+                <i class="bi bi-mic"></i> Transcription
+            </button>
+        </li>
+        
+        <!-- Console Tab -->
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="console-tab" data-bs-toggle="tab"
+                    data-bs-target="#console-pane" type="button" role="tab">
+                <i class="bi bi-terminal"></i> Console
+            </button>
+        </li>
+        
+        <!-- Template Tab -->
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="template-tab" data-bs-toggle="tab"
+                    data-bs-target="#template-pane" type="button" role="tab">
+                <i class="bi bi-file-text"></i> Template
+            </button>
+        </li>
+        
+        <!-- Summary Tab -->
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="summary-tab" data-bs-toggle="tab"
+                    data-bs-target="#summary-pane" type="button" role="tab">
+                <i class="bi bi-list-ul"></i> Summary
+            </button>
+        </li>
+    </ul>
+    
+    <div class="tab-content" id="contentTabsContent">
+        <!-- Transcription Content -->
+        <div class="tab-pane fade show active" id="transcription-pane" role="tabpanel">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Transcription</h5>
+                    <div class="btn-group">
+                        <button class="btn btn-outline-primary btn-sm" onclick="copyTranscription()">
+                            <i class="bi bi-clipboard"></i> Copy Transcript
+                        </button>
+                        <button class="btn btn-outline-danger btn-sm" onclick="clearTranscription()">
+                            <i class="bi bi-trash"></i> Clear
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="transcription" class="content-area" contenteditable="true" 
+                         data-placeholder="Transcription will appear here..."></div>
+                    <div class="edit-indicator">Click to edit</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Console Content -->
+        <div class="tab-pane fade" id="console-pane" role="tabpanel">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Console</h5>
+                    <div class="btn-group">
+                        <button class="btn btn-outline-primary btn-sm" onclick="copyConsole()">
+                            <i class="bi bi-clipboard"></i> Copy Status
+                        </button>
+                        <button class="btn btn-outline-danger btn-sm" onclick="clearConsole()">
+                            <i class="bi bi-trash"></i> Clear
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="console" class="content-area console-area" contenteditable="true"
+                         data-placeholder="Console output will appear here..."></div>
+                    <div class="edit-indicator">Click to edit</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Template Content -->
+        <div class="tab-pane fade" id="template-pane" role="tabpanel">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Template</h5>
+                    <div class="btn-group">
+                        <button class="btn btn-outline-primary btn-sm" onclick="useTemplate()">
+                            <i class="bi bi-file-text"></i> Use Template For Summary
+                        </button>
+                        <button class="btn btn-outline-danger btn-sm" onclick="clearTemplate()">
+                            <i class="bi bi-trash"></i> Clear
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="resetTemplate()">
+                            <i class="bi bi-arrow-counterclockwise"></i> Reset
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="template" class="content-area" contenteditable="true"
+                         data-placeholder="Enter your template here...">Patient_Name:
+-patient name or N/A
+
+Date:
+-date or N/A
+
+Reason_for_Meeting:
+-main reason or N/A
+
+History:
+-patient history or N/A (if multiple points: 1. First point 2. Second point)
+
+Examination:
+-examination details or N/A (if multiple points: 1. First finding 2. Second finding)
+
+Discussion:
+-discussion points or N/A (if multiple points: 1. First topic 2. Second topic)
+
+Plan:
+-treatment plan or N/A (if multiple points: 1. First step 2. Second step)
+
+Follow_up:
+-follow up details or N/A</div>
+                    <div class="edit-indicator">Click to edit</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Summary Content -->
+        <div class="tab-pane fade" id="summary-pane" role="tabpanel">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Meeting Summary</h5>
+                    <div class="btn-group">
+                        <button class="btn btn-outline-primary btn-sm" onclick="generateSummary()">
+                            <i class="bi bi-lightning"></i> Generate Summary
+                        </button>
+                        <button class="btn btn-outline-danger btn-sm" onclick="clearSummary()">
+                            <i class="bi bi-trash"></i> Clear
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="summary-content" class="content-area" contenteditable="true"
+                         data-placeholder="Summary will appear here..."></div>
+                    <div class="edit-indicator">Click to edit</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 添加相应的 CSS -->
+<style>
+.content-area {
+    min-height: 300px;
+    max-height: 500px;
+    overflow-y: auto;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    font-family: monospace;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.console-area {
+    background-color: #212529;
+    color: #fff;
+}
+
+.nav-tabs .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card-header {
+    background-color: #fff;
+    border-bottom: 1px solid rgba(0,0,0,0.125);
+}
+
+.btn-group .btn {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+</style>
+
+<!-- 添加相应的 JavaScript 函数 -->
+<script>
+let isRecording = false;
+let isPaused = false;
+let timerInterval;
+let seconds = 0;
+let minutes = 0;
+let hours = 0;
+
+function startTimer(resumeTime = false) {
+    if (!resumeTime) {
+        seconds = 0;
+        minutes = 0;
+        hours = 0;
+    }
+    
+    timerInterval = setInterval(function() {
+        seconds++;
+        if (seconds >= 60) {
+            seconds = 0;
+            minutes++;
+            if (minutes >= 60) {
+                minutes = 0;
+                hours++;
+            }
+        }
+        updateTimerDisplay();
+    }, 1000);
+}
+
+function updateTimerDisplay() {
+    const display = document.getElementById('recording-timer');
+    display.value = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+}
+
+function stopTimer() {
+    clearInterval(timerInterval);
+    document.getElementById('save-note').disabled = false;
+}
+
+function resetButton() {
+    const startButton = document.getElementById('start-button');
+    startButton.classList.remove('recording', 'resume');
+    startButton.innerHTML = '<i class="bi bi-mic-fill"></i> Start Transcription';
+    isRecording = false;
+    isPaused = false;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const startButton = document.getElementById('start-button');
+    
+    startButton.addEventListener('click', async function() {
+        if (!isRecording) {
+            try {
+                startTimer(isPaused);
+                
+                // Update button appearance
+                this.classList.add('recording');
+                this.innerHTML = '<i class="bi bi-stop-fill"></i> Stop Transcription';
+                
+                const response = await fetch('/webapp/record/start-transcription/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                });
+                
+                const data = await response.json();
+                console.log("Transcription started:", data);
+                isRecording = true;
+                isPaused = false;
+                
+                // Clear previous transcription if not resuming
+                if (!isPaused) {
+                    document.getElementById('transcription').innerHTML = '';
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                stopTimer();
+                resetButton();
+            }
+        } else {
+            try {
+                stopTimer();
+                
+                const audioPlayer = document.querySelector('.audio-player-section');
+                audioPlayer.style.display = 'block';
+                console.log("Showing audio player");
+                
+                // Update button to show Resume
+                this.classList.remove('recording');
+                this.classList.add('resume');
+                this.innerHTML = '<i class="bi bi-play-fill"></i> Resume';
+                
+                const response = await fetch('/webapp/record/stop-transcription/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                });
+                
+                const data = await response.json();
+                console.log("Transcription stopped response:", data);
+
+                if (data.status === 'success' && data.audio_url) {
+                    console.log("Received audio URL:", data.audio_url);
+                    updateAudioPlayer(data.audio_url);
+                } else {
+                    console.error("No audio URL in response:", data);
+                }
+                
+                isRecording = false;
+                isPaused = true;
+                
+            } catch (error) {
+                console.error('Error:', error);
+                resetButton();
+            }
+        }
+    });
+
+    // Initialize other elements and event listeners
+    // ... (keep your existing initialization code)
+});
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function copyTranscription() {
+    const text = document.getElementById('transcription').innerText;
+    navigator.clipboard.writeText(text).then(() => {
+        alert('Transcription copied to clipboard!');
+    });
+}
+
+function clearTranscription() {
+    if (confirm('Are you sure you want to clear the transcription?')) {
+        clearContentArea('transcription');
+    }
+}
+
+function copyConsole() {
+    const text = document.getElementById('console').innerText;
+    navigator.clipboard.writeText(text).then(() => {
+        alert('Console content copied to clipboard!');
+    });
+}
+
+function clearConsole() {
+    if (confirm('Are you sure you want to clear the console?')) {
+        clearContentArea('console');
+    }
+}
+
+function useTemplate() {
+    const transcription = document.getElementById('transcription').innerText;
+    const template = document.getElementById('template').innerText;
+    
+    fetch('/webapp/record/generate-template-summary/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            template_text: template,
+            conversation_text: transcription
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('summary-content').innerHTML = data.summary;
+            // 自动切换到摘要标签页
+            document.getElementById('summary-tab').click();
+        } else {
+            alert('Error generating template summary: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error generating template summary');
+    });
+}
+
+function clearTemplate() {
+    if (confirm('Are you sure you want to clear the template?')) {
+        clearContentArea('template');
+    }
+}
+
+function generateSummary() {
+    const transcription = document.getElementById('transcription').innerText;
+    
+    fetch('/webapp/record/generate-summary/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            text: transcription
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('summary-content').innerHTML = data.summary;
+        } else {
+            alert('Error generating summary: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error generating summary');
+    });
+}
+
+function clearSummary() {
+    if (confirm('Are you sure you want to clear the summary?')) {
+        clearContentArea('summary-content');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // 为所有可编辑区域添加占位符功能
+    document.querySelectorAll('.content-area[contenteditable]').forEach(element => {
+        // 初始显示占位符
+        if (!element.textContent.trim()) {
+            element.classList.add('empty');
+        }
+
+        // 焦点事件
+        element.addEventListener('focus', function() {
+            if (this.classList.contains('empty')) {
+                this.classList.remove('empty');
+                this.textContent = '';
+            }
+        });
+
+        // 失焦事件
+        element.addEventListener('blur', function() {
+            if (!this.textContent.trim()) {
+                this.classList.add('empty');
+                this.textContent = this.getAttribute('data-placeholder');
+            }
+        });
+
+        // 初始化
+        if (!element.textContent.trim()) {
+            element.classList.add('empty');
+            element.textContent = element.getAttribute('data-placeholder');
+        }
+    });
+});
+
+// 更新清除函数以处理占位符
+function clearContentArea(elementId) {
+    const element = document.getElementById(elementId);
+    element.textContent = '';
+    element.classList.add('empty');
+    element.textContent = element.getAttribute('data-placeholder');
+}
+
+const DEFAULT_TEMPLATE = `Patient_Name:
+-patient name or N/A
+
+Date:
+-date or N/A
+
+Reason_for_Meeting:
+-main reason or N/A
+
+History:
+-patient history or N/A (if multiple points: 1. First point 2. Second point)
+
+Examination:
+-examination details or N/A (if multiple points: 1. First finding 2. Second finding)
+
+Discussion:
+-discussion points or N/A (if multiple points: 1. First topic 2. Second topic)
+
+Plan:
+-treatment plan or N/A (if multiple points: 1. First step 2. Second step)
+
+Follow_up:
+-follow up details or N/A`;
+
+function resetTemplate() {
+    if (confirm('Are you sure you want to reset the template to default?')) {
+        document.getElementById('template').innerHTML = DEFAULT_TEMPLATE;
+    }
+}
+
+// 修改 DOMContentLoaded 事件处理器
+document.addEventListener('DOMContentLoaded', function() {
+    // ... 其他代码 ...
+
+    // 初始化模板
+    const templateElement = document.getElementById('template');
+    if (!templateElement.textContent.trim() || 
+        templateElement.textContent === templateElement.getAttribute('data-placeholder')) {
+        templateElement.innerHTML = DEFAULT_TEMPLATE;
+    }
+});
+
+function saveNote() {
+    const title = document.getElementById('note-title').value;
+    if (!title) {
+        alert('Please enter a title for the note');
+        return;
+    }
+
+    // 获取所有需要的数据
+    const noteId = {% if note %}{{ note.id }}{% else %}null{% endif %};
+    const language = document.getElementById('language-select').value;
+    const recordingTime = document.getElementById('recording-timer').value;
+    const transcription = document.getElementById('transcription').innerText;
+    const summary = document.getElementById('summary-content').innerText;
+    const template = document.getElementById('template').innerText;
+
+    // 发送保存请求
+    fetch(`/webapp/record/${noteId ? 'update' : 'save'}-note/` + (noteId ? `${noteId}/` : ''), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            title: title,
+            language: language,
+            recording_time: recordingTime,
+            transcription: transcription,
+            summary: summary,
+            template: template
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Note saved successfully!');
+            window.location.href = '/webapp/history/';
+        } else {
+            alert('Error saving note: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error saving note');
+    });
+}
+</script>
+{% endblock %}

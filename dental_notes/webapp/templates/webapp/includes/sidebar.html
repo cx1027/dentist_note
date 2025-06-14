@@ -1,0 +1,38 @@
+<nav id="sidebar">
+    <div class="sidebar-header">
+        <h3>Dental Notes</h3>
+    </div>
+
+    <ul class="list-unstyled components">
+        <li class="{% if request.resolver_match.url_name == 'speech_index' %}active{% endif %}">
+            <a href="{% url 'speech_index' %}">
+                <i class="bi bi-plus-circle"></i>
+                Create
+            </a>
+        </li>
+        <li class="{% if request.resolver_match.url_name == 'history' %}active{% endif %}">
+            <a href="{% url 'history' %}">
+                <i class="bi bi-clock-history"></i>
+                History
+            </a>
+        </li>
+        <li class="{% if request.resolver_match.url_name == 'template' %}active{% endif %}">
+            <a href="{% url 'template' %}">
+                <i class="bi bi-file-text"></i>
+                Template
+            </a>
+        </li>
+        <li class="{% if request.resolver_match.url_name == 'account' %}active{% endif %}">
+            <a href="{% url 'account' %}">
+                <i class="bi bi-person"></i>
+                Account
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'logout' %}">
+                <i class="bi bi-box-arrow-right"></i>
+                Logout
+            </a>
+        </li>
+    </ul>
+</nav> 

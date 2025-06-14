@@ -1,0 +1,136 @@
+
+curl -X 'GET' \
+  'https://oxoo0qq216ei3c-8008.proxy.runpod.net/v1/models' \
+  -H "Authorization: Bearer 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" \
+  -H 'accept: application/json'
+
+
+
+
+
+curl -X 'GET' \
+  'https://oxoo0qq216ei3c-8008.proxy.runpod.net/v1/models' \
+  -H "Authorization: Bearer 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" \
+  -H 'accept: application/json'
+{"object":"list","data":[{"id":"meta-llama/Meta-Llama-3.1-70B-Instruct","object":"model","created":1731917359,"owned_by":"vllm","root":"meta-llama/Meta-Llama-3.1-70B-Instruct","parent":null,"max_model_len":8128,"permission":[{"id":"modelperm-110e1375e1c04faf85ca4db5d43b216c","object":"model_permission","created":1731917359,"allow_create_engine":false,"allow_sampling":true,"allow_logprobs":true,"allow_search_indices":false,"allow_view":true,"allow_fine_tuning":false,"organization":"*","group":null,"is_blocking":false}]}]}%   
+
+
+
+
+
+(myenv) (base) xiu@XIUs-MBP speech-to-text % curl -X 'POST' \
+  'https://ipm1wipet51hbz-8008.proxy.runpod.net/tokenize' \
+  -H "Authorization: Bearer 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" \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "model": "meta-llama/Meta-Llama-3.1-70B-Instruct",
+  "prompt": "You are an dentist assistant: what is your name?",
+  "add_special_tokens": true
+}'
+{"count":12,"max_model_len":8128,"tokens":[128000,2675,527,459,50351,18328,25,1148,374,701,836,30]}%          
+(myenv) (base) xiu@XIUs-MBP speech-to-text % 
+
+#v1/chat/completions
+curl -X 'POST' \
+  'https://ipm1wipet51hbz-8008.proxy.runpod.net/v1/chat/completions' \
+  -H "Authorization: Bearer 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" \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "model": "meta-llama/Meta-Llama-3.1-70B-Instruct",
+  "messages": [
+            {"role": "system", "content": "hello"},
+            {"role": "user", "content": "hello, hello"}
+        ],
+        "temperature": 0.6,
+        "stop": "<|eot_id|>"
+}'
+{"id":"chatcmpl-405330b5c7aa44c096520071397a69f9","object":"chat.completion","created":1731966641,"model":"meta-llama/Meta-Llama-3.1-70B-Instruct","choices":[{"index":0,"message":{"role":"assistant","content":"Hello, hello back at you. Is there something I can help you with or would you like to chat?","tool_calls":[]},"logprobs":null,"finish_reason":"stop","stop_reason":null}],"usage":{"prompt_tokens":39,"total_tokens":62,"completion_tokens":23,"prompt_tokens_details":null},"prompt_logprobs":null}%                              
+
+
+curl -X 'POST' \
+  'https://ipm1wipet51hbz-8008.proxy.runpod.net/v1/completions' \
+  -H "Authorization: Bearer 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" \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "model": "meta-llama/Meta-Llama-3.1-70B-Instruct",
+  "prompt": ["As a doctor, analyze this medical consultation transcript and return ONLY a single-level JSON object. 
+        For multiple points in any field, use numbered format (1. 2. 3.) within the same string. You need to use as much as the patient description for your notes.
+        
+        Required JSON format:
+        {
+            "Patient_Name": "patient name or N/A",
+            "Date": "date or N/A",
+            "Reason_for_Meeting": "main reason or N/A",
+            "History": "patient history or N/A (if multiple points: 1. First point 2. Second point)",
+            "Examination": "examination details or N/A (if multiple points: 1. First finding 2. Second finding)",
+            "Discussion": "discussion points or N/A (if multiple points: 1. First topic 2. Second topic)",
+            "Plan": "treatment plan or N/A (if multiple points: 1. First step 2. Second step)",
+            "Follow_up": "follow up details or N/A",
+            "Teeth_Description": {
+                "1": "Upper right central incisor: description or N/A",
+                "2": "Upper right lateral incisor: description or N/A",
+                "3": "Upper right canine: description or N/A",
+                "4": "Upper right first molar: description or N/A",
+                "5": "Upper right second molar: description or N/A",
+                "6": "Upper right third molar: description or N/A",
+                "7": "Upper left third molar: description or N/A",
+                "8": "Upper left second molar: description or N/A",
+                "9": "Upper left first molar: description or N/A",
+                "10": "Upper left canine: description or N/A",
+                "11": "Upper left lateral incisor: description or N/A",
+                "12": "Upper left central incisor: description or N/A",
+                "13": "Lower left central incisor: description or N/A",
+                "14": "Lower left lateral incisor: description or N/A",
+                "15": "Lower left canine: description or N/A",
+                "16": "Lower left first molar: description or N/A",
+                "17": "Lower left second molar: description or N/A",
+                "18": "Lower left third molar: description or N/A",
+                "19": "Lower right third molar: description or N/A",
+                "20": "Lower right second molar: description or N/A",
+                "21": "Lower right first molar: description or N/A",
+                "22": "Lower right canine: description or N/A",
+                "23": "Lower right lateral incisor: description or N/A",
+                "24": "Lower right central incisor: description or N/A",
+                "25": "Lower right central incisor: description or N/A",
+                "26": "Lower right lateral incisor: description or N/A",
+                "27": "Lower right canine: description or N/A",
+                "28": "Lower right first molar: description or N/A",
+                "29": "Lower right second molar: description or N/A",
+                "30": "Lower right third molar: description or N/A",
+                "31": "Lower left third molar: description or N/A",
+                "32": "Lower left second molar: description or N/A"
+            }
+        }
+
+        Rules:
+        1. Return ONLY the JSON object, no additional text
+        2. Use "N/A" for missing information in Patient_Name, Date, Reason_for_Meeting, History, Examination, Discussion, Plan, Follow_up.
+        3. Keep all points for each field in a single string
+        4. Use numbered format (1. 2. 3.) for multiple points within the same string
+        5. Do not create nested objects or arrays
+        6. For teeth description, if not mention any teeth specifically, mark as N/A for missing information.
+        
+        Here is the transcript to analyze: Hello. Hello.
+        Hello. Hello.
+        Hello, are you? "],
+        "temperature": 0.9,
+        "stop": "<|eot_id|>"
+}'
+
+
+
+
+curl -X 'POST' \
+  'https://ipm1wipet51hbz-8008.proxy.runpod.net/v1/completions' \
+  -H "Authorization: Bearer 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" \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "model": "meta-llama/Meta-Llama-3.1-70B-Instruct",
+  "prompt": ["As a doctor, you need to use as much as the patient description for your notes."],
+  "temperature": 0.9,
+  "stop": "<|eot_id|>"
+}'

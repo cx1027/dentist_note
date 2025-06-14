@@ -1,0 +1,214 @@
+{% extends 'webapp/base.html' %}
+{% load static %}
+
+{% block title %}Note History - Dental Notes{% endblock %}
+
+{% block extra_css %}
+<style>
+    .history-container {
+        padding: 20px;
+    }
+    
+    .table th {
+        background-color: #f8f9fa;
+    }
+    
+    .actions-column {
+        width: 150px;
+    }
+    
+    .btn-view {
+        width: 80px;
+    }
+    
+    .note-detail-modal .modal-dialog {
+        max-width: 800px;
+    }
+    
+    .note-detail-section {
+        margin-bottom: 20px;
+        padding: 15px;
+        border-radius: 8px;
+        background-color: #f8f9fa;
+    }
+    
+    .note-detail-section h5 {
+        color: #2c3e50;
+        margin-bottom: 10px;
+    }
+    
+    .audio-section audio {
+        width: 100%;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="history-container">
+    <h2 class="mb-4">Note History</h2>
+    
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Created</th>
+                    <th>Last Updated</th>
+                    <th>Title</th>
+                    <th>Language</th>
+                    <th>Duration</th>
+                    <th class="actions-column">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for note in notes %}
+                <tr>
+                    <td>{{ note.created_at|date:"Y-m-d H:i" }}</td>
+                    <td>{{ note.updated_at|date:"Y-m-d H:i" }}</td>
+                    <td>{{ note.title }}</td>
+                    <td>{{ note.language }}</td>
+                    <td>{{ note.recording_time }}</td>
+                    <td>
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'speech_index' %}?note_id={{ note.id }}" 
+                               class="btn btn-primary btn-sm">
+                                Edit
+                            </a>
+                            <button class="btn btn-danger btn-sm" 
+                                    onclick="deleteNote({{ note.id }}, '{{ note.title|escapejs }}')">
+                                Delete
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center">No notes found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Note Detail Modal -->
+<div class="modal fade note-detail-modal" id="noteDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Note Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="noteDetailContent">
+                    <!-- Content will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 处理查看笔记详情
+    const modal = document.getElementById('noteDetailModal');
+    modal.addEventListener('show.bs.modal', function(event) {
+        const button = event.relatedTarget;
+        const noteId = button.getAttribute('data-note-id');
+        
+        // 取笔记详情
+        fetch(`/webapp/record/note-detail/${noteId}/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const note = data.note;
+                    let content = `
+                        <div class="note-detail-section">
+                            <h5>Basic Information</h5>
+                            <p><strong>Title:</strong> ${note.title}</p>
+                            <p><strong>Created:</strong> ${note.created_at}</p>
+                            <p><strong>Language:</strong> ${note.language}</p>
+                            <p><strong>Duration:</strong> ${note.recording_time}</p>
+                        </div>
+                        
+                        <div class="note-detail-section">
+                            <h5>Transcription</h5>
+                            <div class="transcription-content">
+                                ${note.transcription}
+                            </div>
+                        </div>`;
+                    
+                    if (note.summary) {
+                        content += `
+                        <div class="note-detail-section">
+                            <h5>Summary</h5>
+                            <div class="summary-content">
+                                ${note.summary}
+                            </div>
+                        </div>`;
+                    }
+                    
+                    if (note.audio_url) {
+                        content += `
+                        <div class="note-detail-section audio-section">
+                            <h5>Audio Recording</h5>
+                            <audio controls>
+                                <source src="${note.audio_url}" type="audio/wav">
+                                Your browser does not support the audio element.
+                            </audio>
+                        </div>`;
+                    }
+                    
+                    document.getElementById('noteDetailContent').innerHTML = content;
+                } else {
+                    alert('Error loading note details: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error loading note details');
+            });
+    });
+});
+
+function deleteNote(noteId, noteTitle) {
+    if (confirm(`Are you sure you want to delete note "${noteTitle}"?`)) {
+        fetch(`/webapp/record/delete-note/${noteId}/`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // 刷新页面以显示更新后的列表
+                window.location.reload();
+            } else {
+                alert('Error deleting note: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error deleting note');
+        });
+    }
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %} 

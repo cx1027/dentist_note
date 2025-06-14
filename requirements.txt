@@ -1,0 +1,25 @@
+faster-whisper >= 1.0.3
+sounddevice >= 0.4.7
+eel >= 0.17.0
+soundfile >= 0.12.1
+websockets >= 12.0
+librosa >= 0.10.2.post1
+openai >= 1.37.0
+anyio==4.3.0
+certifi==2024.2.2
+charset-normalizer==3.3.2
+exceptiongroup==1.2.0
+h11==0.14.0
+httpcore==1.0.4
+httpx==0.25.2
+idna==3.6
+ollama==0.1.7
+requests==2.31.0
+sniffio==1.3.1
+typing_extensions==4.10.0
+urllib3==2.2.1
+django==4.2.10
+channels==4.0.0
+django-eel
+daphne
+psycopg2

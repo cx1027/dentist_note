@@ -1,0 +1,15 @@
+venv/
+# myenv/
+dental_notes/dental_notes/cwebsocket/__pycache__/
+dental_notes/dental_notes/dental_notes/__pycache__/
+dental_notes/dental_notes/webapp/__pycache__/
+
+env/
+*.pyc
+__pycache__/
+
+media/
+
+# Large binary files
+*.dylib
+*.so

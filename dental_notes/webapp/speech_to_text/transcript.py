@@ -39,10 +39,6 @@ websocket_server: WebSocketServer = None
 openai_api: OpenAIAPI = None
 ollama_api: OllamaAPI = None
 
-# Hugging Face API configuration
-# HUGGINGFACE_API_URL = "https://api-inference.huggingface.co/models/meta-llama/Llama-3.1-70B"
-# HUGGINGFACE_API_KEY = "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"  # Replace with your actual API key
-
 # RunPod API configuration
 RUNPOD_API_URL = "https://ipm1wipet51hbz-8008.proxy.runpod.net/"  # Replace with your actual RunPod endpoint
 RUNPOD_API_KEY = "RUNPOD token"  # Replace with your actual API key

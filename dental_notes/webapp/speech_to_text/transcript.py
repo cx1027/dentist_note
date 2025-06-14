@@ -45,7 +45,7 @@ ollama_api: OllamaAPI = None
 
 # RunPod API configuration
 RUNPOD_API_URL = "https://ipm1wipet51hbz-8008.proxy.runpod.net/"  # Replace with your actual RunPod endpoint
-RUNPOD_API_KEY = "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"  # Replace with your actual API key
+RUNPOD_API_KEY = "RUNPOD token"  # Replace with your actual API key
 
 # from openai import OpenAI
 # client = OpenAI(

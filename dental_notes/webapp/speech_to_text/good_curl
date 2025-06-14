@@ -20,7 +20,7 @@ curl -X 'GET' \
 
 (myenv) (base) xiu@XIUs-MBP speech-to-text % curl -X 'POST' \
   'https://ipm1wipet51hbz-8008.proxy.runpod.net/tokenize' \
-  -H "Authorization: Bearer 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" \
+  -H "Authorization: Bearer huggingface token" \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
   -d '{

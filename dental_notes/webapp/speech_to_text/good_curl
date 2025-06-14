@@ -1,7 +1,7 @@
 
 curl -X 'GET' \
   'https://oxoo0qq216ei3c-8008.proxy.runpod.net/v1/models' \
-  -H "Authorization: Bearer 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" \
+  -H "Authorization: Bearer huggingface token" \
   -H 'accept: application/json'
 
 
@@ -10,7 +10,7 @@ curl -X 'GET' \
 
 curl -X 'GET' \
   'https://oxoo0qq216ei3c-8008.proxy.runpod.net/v1/models' \
-  -H "Authorization: Bearer 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" \
+  -H "Authorization: Bearer huggingface token" \
   -H 'accept: application/json'
 {"object":"list","data":[{"id":"meta-llama/Meta-Llama-3.1-70B-Instruct","object":"model","created":1731917359,"owned_by":"vllm","root":"meta-llama/Meta-Llama-3.1-70B-Instruct","parent":null,"max_model_len":8128,"permission":[{"id":"modelperm-110e1375e1c04faf85ca4db5d43b216c","object":"model_permission","created":1731917359,"allow_create_engine":false,"allow_sampling":true,"allow_logprobs":true,"allow_search_indices":false,"allow_view":true,"allow_fine_tuning":false,"organization":"*","group":null,"is_blocking":false}]}]}%   
 
